@@ -1,0 +1,34 @@
+{
+    "wallets": {
+        "wallet1" : {
+            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 3.00,
+            "gpio" : 1
+        },
+        "wallet2" : {
+            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 3.00,
+            "gpio" : 2
+        },
+        "wallet3" : {
+            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 4.00,
+            "gpio" : 3
+        },
+        "wallet4" : {
+            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 3.00,
+            "gpio" : 4
+        },
+        "wallet5" : {
+            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 15.00,
+            "gpio" : 5
+        },                            
+        "wallet6" : {
+            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 5.00,
+            "gpio" : 6
+        }    
+    }
+}
