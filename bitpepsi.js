@@ -18,7 +18,7 @@ for( var wallet in Config.wallets ) {
 //
 //
 
-energize(4);
+energize(7);
 
 function openConnection(wallet, callback) {
 
