@@ -3,7 +3,7 @@
 var WebSocket = require('ws');
 var Config = require('./config/bitPepsi.json')
 var btcstats = require("btc-stats");
-//var gpio = require('pi-gpio');
+var gpio = require('pi-gpio');
 
 // establish Websocket connection
 console.log('Establising web socket...');
