@@ -18,6 +18,8 @@ for( var wallet in Config.wallets ) {
 //
 //
 
+energize(4);
+
 function openConnection(wallet, callback) {
 
     var req = {type: "address", address:wallet.pubkey, block_chain: "bitcoin"};
@@ -34,12 +36,12 @@ function openConnection(wallet, callback) {
                 console.log("Watching address %s for a deposit value of $%s", wallet.pubkey, wallet.itemcost);
             }
 
-            callback()
+            callback(wallet)
         });
     });   
 }
 
-function watchConnection() {
+function watchConnection(wallet) {
 
     conn.on('error',function (error) {
         console.log ('ERROR! Error detected: %s', error);
@@ -60,11 +62,7 @@ function watchConnection() {
             // does the amount align with the expected amount?
 
             // activate GPIO
-            gpio.open(16, "output", function(err) {     // Open pin  output 
-                gpio.write(16, 1, function() {          // Set pin  high (1) 
-                    gpio.close(16);                     // Close pin 
-                });
-            });
+            energize(wallet.gpio)
 
         } else if (data.payload.type = "heartbeat") {
             return;
@@ -74,9 +72,15 @@ function watchConnection() {
 
 function energize(pin) {
     gpio.open(pin, "output", function(err) {     // Open pin  output 
-        gpio.write(pin, 1, function() {          // Set pin  high (1) 
-            gpio.close(pin);                     // Close pin 
-        });
+        
+        if( err != undefined ) {
+            gpio.write(pin, 1, function() {          // Set pin  high (1) 
+                gpio.close(pin);                     // Close pin 
+            });
+        }
+        else {
+            console.log("error: %s", err);
+        }
     });    
 }
 
