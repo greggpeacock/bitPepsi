@@ -1,44 +1,38 @@
 {
-    "wallets": {
-        "wallet1" : {
-            "pubkey" : "1HBfz9HPSko7kUt5Vt8rPh4bfMfrxZBy6A",
+    "wallets": [
+        {"pubkey" : "1HBfz9HPSko7kUt5Vt8rPh4bfMfrxZBy6A",
             "itemcost" : 0.15,
             "gpio" : 11,
             "gpiocycletime" : 2500,
             "pricetolerance" : 0.10
         },
-        "wallet2" : {
-            "pubkey" : "1L29y3VNRcCQdqvXhV1Jw2ALRARJeDsjDD",
+        {"pubkey" : "1L29y3VNRcCQdqvXhV1Jw2ALRARJeDsjDD",
             "itemcost" : 0.50,
             "gpio" : 12,
             "gpiocycletime" : 2500,
             "pricetolerance" : 0.05
         },
-        "wallet3" : {
-            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
             "itemcost" : 4.00,
             "gpio" : 13,
             "pricetolerance" : 0.03
         },
-        "wallet4" : {
-            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
             "itemcost" : 3.00,
             "gpio" : 15,
             "pricetolerance" : 0.03
         },
-        "wallet5" : {
-            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
             "itemcost" : 15.00,
             "gpio" : 16,
             "pricetolerance" : 0.03
         },                            
-        "wallet6" : {
-            "pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
             "itemcost" : 5.00,
             "gpio" : 18,
             "pricetolerance" : 0.03
         }    
-    },
+    ],
 
     "gpio": {
         "gpioopentime" : 250,
@@ -57,5 +51,6 @@
     "test" : "'hostname' : 'api.bitcoiaverage.com', 'port' : 443, 'path' : '/ticket/global/CAD','method':'GET'",
 
     "exchanges" : ["bistamp","bitfinex"],
-    "websocket" : "wss://ws.chain.com/v2/notifications"
+    "websocket" : "wss://ws.chain.com/v2/notifications",
+    "debug" : "false"
 }

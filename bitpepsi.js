@@ -1,10 +1,10 @@
 'use strict';
 
-var WebSocket = require('ws');
-var Config = require('./config/bitPepsi.json')
-var btcstats = require('btc-stats');
-var btcprice = require('./lib/btcprice');
-var moment = require('moment');
+var WebSocket = require('ws'); 
+var Config = require('./config/bitPepsi.json') // JSON configuration file for the application
+var btcstats = require('btc-stats'); // retired
+var btcprice = require('./lib/btcprice'); // realtime xbt market price in CAD
+var logger = require('winston'); // file and console loggin
 var gpio = require('pi-gpio'); // note, you must run this script on a raspberry pi for this to work!
 
 /*
@@ -18,7 +18,6 @@ utility functions:
 - gpio cycle test
 - acquire live bitcoin price from bitstamp in USD
 
-
 */
 
 
@@ -26,7 +25,6 @@ utility functions:
 var opensocket = function(wallet, ack) {
     // define address
     var req = {type: "address", address:wallet.pubkey, block_chain: "bitcoin"};
-    //console.log(req);
     
     // open, activate the connection
     conn.on('open', function () {        
@@ -38,7 +36,7 @@ var opensocket = function(wallet, ack) {
             else
             {
                 logit("Connection successful.");
-                watchwallet(wallet)
+                watchwallet(wallet);
             }
         });
     });
@@ -49,6 +47,7 @@ var opensocket = function(wallet, ack) {
     });
 
     // re-connect
+    // this is NOT TESTED.
     conn.on('close',function (wallet) {
         logit("Connection lost. Reconnecting in 10 seconds....");
         setTimeout(opensocket(wallet),10000);
@@ -58,15 +57,15 @@ var opensocket = function(wallet, ack) {
 
 var watchwallet = function(wallet) {
     logit("Watching address "+ wallet.pubkey +" for a deposit value of $" + wallet.itemcost);    
-    // change detected
+
     conn.on('message', function (data, flags) {
 
-        var activity = JSON.parse(data);
+        var activity = JSON.parse(data); // parse the websocket reponse
 
         if (activity.payload.type == "address" && activity.payload.received != 0){
-            // event detected!
-            logit('Event detected.');
-            validateDeposit(wallet, activity, function(err,validation) {           
+            
+            // validate the deposit
+            validateDeposit(wallet, activity, function(validation) {           
                 logit(validation.msg);
 
                 if(validation.val == true) {
@@ -74,11 +73,13 @@ var watchwallet = function(wallet) {
                     energize(wallet.gpio,1,wallet.gpiocycletime, function() {
                         logit("GPIO "+wallet.gpio+" triggered for "+wallet.gpiocycletime+" ms");
                     })
+                } else {
+                    logit(validation.msg);
                 }
             });
 
         } else if (activity.payload.type == "heartbeat") {
-            logit("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated; " + currentPrice.updated);
+            //logit("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
         } else {
             logit('Other activity detected. Ignoring (likely a confirmation or a withdrawl).');
         }    
@@ -89,59 +90,47 @@ var watchwallet = function(wallet) {
 var validateDeposit = function (wallet, activity, ack) {
 
     var response = {};
-    response.val = true;
+    response.val = true; // our default condition
 
-    if( activity.payload.confirmations != 0 ) {
-        // this transaction is already confirmed
-        response.val = false;
-        response.msg = "Transaction is not new. "+activity.payload.confirmations+" confirmations exist.";
-        ack(null,response);
+    if( wallet.pubkey == activity.payload.address ) {
+        if( activity.payload.confirmations != 0 ) {
+            // this transaction is already confirmed
+            response.val = false;
+            response.msg = "Transaction is not new. "+activity.payload.confirmations+" confirmations exist.";
+            ack(response);
 
-    } else if( wallet.pubkey != activity.payload.address ) {
-        // deposit address incorrect
-        response.val = false;
-        response.msg = "Transaction went to the wrong address. Expected: "+wallet.pubkey+" Received: " + activity.payload.address;
-        ack(null,response);
+        } else {
+            response.usd = currentPrice.val; // API price in CAD
+            response.received = activity.payload.received/100000000*currentPrice.val; // Amount detected, converted to CAD
+            response.expected = wallet.itemcost;
+            //console.log("price: $%s; received: $%s; expected: $%s; tolerance: $%s",values.usd,values.received,values.expected,wallet.pricetolerance);
 
-    } else {
-        // deposit amount incorrect
-        marketPrice (function (err,data) {
-            
-            if(err) {
+            if((response.expected - response.received) > wallet.pricetolerance) {
                 response.val = false;
+                response.msg = "Value was not the expected amount. Expected: $" + response.expected + " Received: $" + response.received;
+            } else {
+                response.msg = "Transaction is VALID.";
+                ack(response);
             }
-            else
-            {
-                response.usd = data; // API price in USD
-                response.received = activity.payload.received/100000000*data; // Amount detected, converted to USD
-                response.expected = wallet.itemcost;
-
-                //console.log("price: $%s; received: $%s; expected: $%s; tolerance: $%s",values.usd,values.received,values.expected,wallet.pricetolerance);
-
-                if((response.expected - response.received) > wallet.pricetolerance) {
-                    response.val = false;
-                    response.msg = "Value was not the expected amount. Expected: $" + response.expected + " Received: $" + response.received;
-                }
-                else
-                    response.msg = "Transaction is VALID.";
-            }
-
-            ack(err,response);
-        });
-    }    
+        }
+    } else {
+        response.val = false;
+    }
 }
 
+// GPIO controls for the Raspberry Pi Controller
 var energize = function(pin,level,duration,ack) {
     gpio.open(pin, "output", function(err) {     // Open pin  output 
         
        if(err) {
             // likely what's happened here is that port is still open from a previous session. let's close it and recycle.
-            gpio.close(pin, function(err) {  logit("We're having trouble closing the port.");});
+            gpio.close(pin, function(err) { logit("We're having trouble closing the port.");});
        }
 
         gpio.write(pin,1, function high(err) { // 1=high 0=low
             setTimeout(function delaypin(err) {
                 gpio.write(pin,0, function low(err) {
+                    if(err) logit(err);
                     gpio.close(pin, function closepin(err) {
                         if (err) {
                             logit("There was an error closing the PIN.");
@@ -162,35 +151,34 @@ var energize = function(pin,level,duration,ack) {
     });    
 }
 
-var marketPrice = function(ack) {
-    var price;
-    btcstats.exchanges(["bitfinex", "bitstamp"]);    
-    btcstats.avg(function(err, resp) {
-        if (!err) {
-            ack(null,resp.price);
-        }
-    }); 
-} 
-
 var logit = function(msg) {
-    console.log('[' + moment().format() + '] :: ' + msg)
+    if(msg) logger.info(msg);
 }
 
 /*
 ======================================================
 */
 
+// initiate logger
+logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
+if( Config.debug != "true" ) logger.remove(logger.transports.Console);
+
+// get xbt market price,keep updating it.
 var currentPrice = {};
 btcprice.updatePrice(function(x) {
     currentPrice.val = x.last;
     currentPrice.updated = x.timestamp;
 });
 
+// begin main processes
 logit('Establising web socket...'); 
 var conn = new WebSocket(Config.websocket);
+var x = Config.wallets;
 
-opensocket(Config.wallets.wallet1, function(err) {
-if (err != undefined )
-    console.log(err);
+x.forEach(function(item,index) {
+    //console.log(item);
+    opensocket(item, function(err) {
+    if (err != undefined )
+        console.log(err);
+    });    
 });
-
