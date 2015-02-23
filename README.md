@@ -4,6 +4,36 @@
 
 <p>This application is designed to watch specific bitcoin wallet(s) for specific deposit amounts. When detected, the application will fire a specific GPIO on the Raspberry Pi which is then used to activate the vending mechanism in whatever vending machine you have it connected to.</p>
 
+<h2>INSTALLING</h2>
+<p>Buckle up this is going to be bumpy.</p>
+<ul><li>Download the latest image of debian linux for the Raspberry Pi (Raspian).</li>
+<li>Install node.</li>
+<li>Realise that node is some kind of ancient radio-related package, uninstall node.</li>
+<li>Install nodejs.</li>
+<li>Try to run the program (It's worth a shot).</li>
+<li>Read error message regarding the absence of the 'btc-stats' module</li>
+<li>Install npm.</li>
+<li>Execute npm install btc-stats.</li>
+<li>Frown at strange error output from npm regarding http get instructions.</li>
+<li>Google the error.</li>
+<li>Shake your head upon realising that the debian npm package is so out of date the SSL certs have expired.</li>
+<li>Hold your nose and curl an online npm install script straight into a root shell.</li>
+<li>Sigh upon seeing the error message 'Your node installation is too old and unsupported'.</li>
+<li>Try the same update method with node itself this time.</li>
+<li>Get exited when the script exits cleanly after 10 minutes.</li>
+<li>Get npm updated via curl again; we're on a roll now.</li>
+<li>Do a quick 'npm --version' check.</li>
+<li>Curse loudly upon seeing 'Node Error: Illegal Hardware Instruction'. Now knowing this strategy will never work on an ARMv6 raspberry pi.</li>
+<li>Find the original, ancient node version in the cached packages. Install via 'dpkg -i'</li>
+<li>Finally get btc-stats installed. Run the program again, somewhat numb to any possible success.</li>
+<li>Turn that frown upside-down, we're up and listening for transactions!.</li>
+<li>Spend some bitcoin to see if it works. Testnet is for losers anyway.</li>
+<li>Ponder error regarding gpio pins.</li>
+<li>Feel better that it's all the fault of upstream maintainers upon reading open github issues on changed gpio device node locations.</li>
+<li>Resign to the fact that your only solution for now is to downgrade Debian even further.</li></ul>
+<p>To be continued...</p>
+
+
 <h2>/config/bitpepsi.json</h2>
 <p>This is the main configuration file, where you can specify wallets and other properties for the application.</p>
 
