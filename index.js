@@ -42,7 +42,7 @@ async.each(x, viewWallet, console.error);
 
 // Start Wallet Check
 function viewWallet(wallet, done) {
-    
+
     async.auto({
         wallet: function(done){done(null, wallet)},
         open: ['wallet', opensocket],
@@ -61,14 +61,14 @@ function opensocket(done, results) {
     
     // open, activate the connection
     conn.on('open', function () {        
-        logit('Websocket opened.');            
+        logger.info('Websocket opened.');            
         conn.send(JSON.stringify(req), function (err) {
             if (err) {
                 done(new Error('Unable to connect to Websocket'));
             }
             else
             {
-                logit("Connection successful.");
+                logger.info("Connection successful.");
                 done();
             }
         });
@@ -80,7 +80,7 @@ function opensocket(done, results) {
     // re-connect
     // this is NOT TESTED.
     conn.on('close',function (wallet) {
-        logit("Connection lost. Reconnecting in 10 seconds....");
+        logger.info("Connection lost. Reconnecting in 10 seconds....");
         setTimeout(opensocket(wallet, done),10000);
     });
 
@@ -89,7 +89,7 @@ function opensocket(done, results) {
 function watchwallet(done, results) {
     var wallet = results.wallet;
 
-    logit("Watching address "+ wallet.pubkey +" for a deposit value of $" + wallet.itemcost);    
+    logger.info("Watching address "+ wallet.pubkey +" for a deposit value of $" + wallet.itemcost);    
 
     conn.on('message', function (data, flags) {
 
@@ -100,9 +100,9 @@ function watchwallet(done, results) {
             done(null, activity)
 
         } else if (activity.payload.type == "heartbeat") {
-            //logit("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
+            //logger.info("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
         } else {
-            logit('Other activity detected. Ignoring (likely a confirmation or a withdrawl).');
+            logger.info('Other activity detected. Ignoring (likely a confirmation or a withdrawl).');
         }    
     });  
 }
