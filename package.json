@@ -6,7 +6,7 @@
   "main": "bitpepsi.js",
   "scripts": {
     "test": "mocha test/",
-    "start":"node index.js",
+    "start": "node index.js"
   },
   "dependencies": {
     "async": "^0.9.0",

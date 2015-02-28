@@ -3,6 +3,17 @@ var assert = require('assert');
 
 var conn = new WebSocket("wss://ws.chain.com/v2/notifications");
 var req = {type:"address", address:"1L29y3VNRcCQdqvXhV1Jw2ALRARJeDsjDD", block_chain:"bitcoin"};
+var x = require('../lib/btcprice');
+
+describe("Info Fetch", function() {
+    it("should fetch latest price", function(done) {
+        x.getPrice(function(err, price) {
+            assert(price);
+            done(err);
+        });
+    });
+})
+
 
 describe("Transaction Verification", function() {
 
