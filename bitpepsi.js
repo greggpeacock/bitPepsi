@@ -2,7 +2,6 @@
 
 var WebSocket = require('ws'); 
 var Config = require('./config/bitPepsi.json') // JSON configuration file for the application
-var btcstats = require('btc-stats'); // retired
 var btcprice = require('./lib/btcprice'); // realtime xbt market price in CAD
 var logger = require('winston'); // file and console loggin
 var gpio = require('pi-gpio'); // note, you must run this script on a raspberry pi for this to work!
@@ -109,7 +108,7 @@ var validateDeposit = function (wallet, activity, ack) {
                 response.val = false;
                 response.msg = "Value was not the expected amount. Expected: $" + response.expected + " Received: $" + response.received;
             } else {
-                response.msg = "Transaction is VALID.";
+                response.msg = "########## Transaction is VALID. ###########";
                 ack(response);
             }
         }
@@ -151,8 +150,9 @@ var energize = function(pin,level,duration,ack) {
     });    
 }
 
-var logit = function(msg) {
-    if(msg) logger.info(msg);
+var logit = function(type,msg) {
+    if(typeof type == "undefined") type = "info";
+    if(msg) logger.log(type,msg);
 }
 
 /*
@@ -160,8 +160,8 @@ var logit = function(msg) {
 */
 
 // initiate logger
-logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
-if( Config.debug != "true" ) logger.remove(logger.transports.Console);
+logger.add(logger.transports.File, { filename: './log/bitpepsi.log', level: 'info' });
+logger.transports.console.level = 'error';
 
 // get xbt market price,keep updating it.
 var currentPrice = {};
