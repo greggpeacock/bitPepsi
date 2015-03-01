@@ -7,6 +7,7 @@ var btcprice = require('./lib/btcprice'); // realtime xbt market price in CAD
 var logger = require('winston'); // file and console loggin
 var gpio = require('pi-gpio'); // note, you must run this script on a raspberry pi for this to work!
 
+var argv = require('minimist')(process.argv.slice(2));
 var async = require('async');
 
 /*
@@ -156,34 +157,36 @@ function energize(done, results) {
 
     logger.info("GPIO "+pin+" triggered for "+duration+" ms");
 
-    gpio.open(pin, "output", function(err) {     // Open pin  output 
-        
-       if(err) {
-            // likely what's happened here is that port is still open from a previous session. let's close it and recycle.
-            gpio.close(pin, function(err) { 
-                done(new Error("We're having trouble closing the port.", err))
-            });
-       }
-
-        gpio.write(pin,1, function high(err) { // 1=high 0=low
-            setTimeout(function delaypin(err) {
-                gpio.write(pin,0, function low(err) {
-                    if(err) done(err);
-                    gpio.close(pin, function closepin(err) {
-                        if (err) {
-                            done(new Error("There was an error closing the PIN."));
-                        }
-                        else
-                        {
-                            logger.info("Close successful.");
-                            done()
-                        }
-                    });
+    if(!argv.n) {
+        gpio.open(pin, "output", function(err) {     // Open pin  output 
+            
+           if(err) {
+                // likely what's happened here is that port is still open from a previous session. let's close it and recycle.
+                gpio.close(pin, function(err) { 
+                    done(new Error("We're having trouble closing the port.", err))
                 });
+           }
 
-            },duration); // how long in ms do we keep the GPIO 'high'
+            gpio.write(pin,1, function high(err) { // 1=high 0=low
+                setTimeout(function delaypin(err) {
+                    gpio.write(pin,0, function low(err) {
+                        if(err) done(err);
+                        gpio.close(pin, function closepin(err) {
+                            if (err) {
+                                done(new Error("There was an error closing the PIN."));
+                            }
+                            else
+                            {
+                                logger.info("Close successful.");
+                                done()
+                            }
+                        });
+                    });
+
+                },duration); // how long in ms do we keep the GPIO 'high'
+
+            });
 
         });
-
-    });    
+    }
 }
