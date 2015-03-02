@@ -25,7 +25,7 @@ utility functions:
 
 // initiate logger
 logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
-if(!(Config.debug != 'true' || process.argv[3] == 'debug')) logger.remove(logger.transports.Console);
+if(!(Config.debug != 'true' || argv.debug)) logger.remove(logger.transports.Console);
 
 // get xbt market price,keep updating it.
 var currentPrice = {};
@@ -109,6 +109,7 @@ function watchwallet(done, results) {
             async.auto({
                 deposit: function(done){done(null, wallet)},
                 validate: ['deposit', validateDeposit],
+                indicate: ['validate', lightOn],
                 energize: ['validate', energize]
             }, done)            
 
@@ -187,6 +188,15 @@ function energize(done, results) {
 
             });
 
-        });
-    }
+    });
+}
+
+function lightOn(done, results) {
+    var fakeresults = {};
+    fakeresults.wallet = {
+                "gpio"          : gpio.indicatorlight, //which pin we use to indicate.
+                "gpiocycletime" : gpio.indicatortime   //keep light on for X ms.
+                 };
+
+    energize(done, fakeresults);
 }
