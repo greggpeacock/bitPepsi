@@ -1,7 +1,7 @@
 'use strict';
 
 var WebSocket = require('ws'); 
-var Config = require('./config/bitPepsi.json') // JSON configuration file for the application
+var Config = require('./config/bitpepsi.stripped.json') // JSON configuration file for the application
 //var btcstats = require('btc-stats'); // retired
 var btcprice = require('./lib/btcprice'); // realtime xbt market price in CAD
 var logger = require('winston'); // file and console loggin
@@ -200,3 +200,4 @@ function lightOn(done, results) {
 
     energize(done, fakeresults);
 }
+/* vim: set et ts=4 sw=4: */

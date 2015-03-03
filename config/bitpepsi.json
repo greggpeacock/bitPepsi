@@ -56,3 +56,4 @@
     "websocket" : "wss://ws.chain.com/v2/notifications",
     "debug" : "false"
 }
+/* vim: set et ts=4 sw=4: */
