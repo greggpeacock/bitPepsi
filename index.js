@@ -2,7 +2,7 @@
 
 var WebSocket = require('ws'); 
 var Config = require('./config/bitPepsi.json') // JSON configuration file for the application
-var btcstats = require('btc-stats'); // retired
+//var btcstats = require('btc-stats'); // retired
 var btcprice = require('./lib/btcprice'); // realtime xbt market price in CAD
 var logger = require('winston'); // file and console loggin
 var gpio = require('pi-gpio'); // note, you must run this script on a raspberry pi for this to work!
@@ -24,18 +24,20 @@ utility functions:
 
 // initiate logger
 logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
-if( Config.debug != "true" ) logger.remove(logger.transports.Console);
+if(!(Config.debug != 'true' || process.argv[3] == 'debug')) logger.remove(logger.transports.Console);
 
 // get xbt market price,keep updating it.
 var currentPrice = {};
-btcprice.updatePrice(function(x) {
-    currentPrice.val = x.last;
-    currentPrice.updated = x.timestamp;
+btcprice.updatePrice(function(x,results) {
+    currentPrice.val = results.last;
+    currentPrice.updated = results.timestamp;
 });
 
 logger.info('Establising web socket...'); 
 var conn = new WebSocket(Config.websocket);
 var x = Config.wallets;
+
+// watch all wallets in the config file
 async.each(x, viewWallet, console.error);
 
 /* ============= */
@@ -44,11 +46,9 @@ async.each(x, viewWallet, console.error);
 function viewWallet(wallet, done) {
 
     async.auto({
-        wallet: function(done){done(null, wallet)},
+        wallet: function(done){done(null, wallet)}, // dont understand this
         open: ['wallet', opensocket],
-        watch: ['open', watchwallet],
-        validate: ['watch', validateDeposit],
-        energize: ['validate', energize]
+        watch: ['open', watchwallet]
     }, done)
 };
 
@@ -58,6 +58,7 @@ function opensocket(done, results) {
     var wallet = results.wallet
     // define address
     var req = {type: "address", address:wallet.pubkey, block_chain: "bitcoin"};
+    console.log(req);
     
     // open, activate the connection
     conn.on('open', function () {        
@@ -91,13 +92,24 @@ function watchwallet(done, results) {
 
     logger.info("Watching address "+ wallet.pubkey +" for a deposit value of $" + wallet.itemcost);    
 
+    // this stays active and waits for a deposit
     conn.on('message', function (data, flags) {
 
         var activity = JSON.parse(data); // parse the websocket reponse
+        //console.log(activity);
 
         if (activity.payload.type == "address" && activity.payload.received != 0){
             
-            done(null, activity)
+            console.log('validating deposit..');
+            //done(null, activity)
+
+            /*this sections needs to be completed. the parent function conn.on must stay active continuously; the validate/energize functions
+            must trigger and close each time conn.on is triggered. */
+            async.auto({
+                deposit: function(done){done(null, wallet)},
+                validate: ['deposit', validateDeposit],
+                energize: ['validate', energize]
+            }, done)            
 
         } else if (activity.payload.type == "heartbeat") {
             //logger.info("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
@@ -127,19 +139,20 @@ function validateDeposit(done, results) {
                 done(new Error("Value was not the expected amount. Expected: $" + response.expected + " Received: $" + response.received))
             } else {
                 logger.info("Transaction is VALID.");
-                done(null, level);
+                done(null, wallet);
             }
         }
     } else {
-        done(new Error("Wallet Key and Activity Address do not match"))
+        done(new Error("Wallet Key and Activity Address do not match."))
     }
 }
 
 // GPIO controls for the Raspberry Pi Controller
 function energize(done, results) {
-    var pin = results.wallet.gpio;
-    var duration = wallet.gpiocycletime;
-    var level = results.validate;
+    var pin = results.validate.gpio;
+    var duration = results.validate.gpiocycletime;
+
+    //console.log(results);
 
     logger.info("GPIO "+pin+" triggered for "+duration+" ms");
 
