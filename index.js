@@ -1,7 +1,7 @@
 'use strict';
 
 var WebSocket = require('ws'); 
-var Config = require('./config/bitPepsi.json') // JSON configuration file for the application
+var Config = require('./config/bitpepsi.json') // JSON configuration file for the application
 var merge = require('merge');
 var btcprice = require('./lib/btcprice'); // realtime xbt market price in CAD
 var logger = require('winston'); // file and console loggin
