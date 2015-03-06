@@ -2,11 +2,10 @@
 
 var WebSocket = require('ws'); 
 var Config = require('./config/bitPepsi.json') // JSON configuration file for the application
-//var btcstats = require('btc-stats'); // retired
+var merge = require('merge');
 var btcprice = require('./lib/btcprice'); // realtime xbt market price in CAD
 var logger = require('winston'); // file and console loggin
 var gpio = require('pi-gpio'); // note, you must run this script on a raspberry pi for this to work!
-
 var async = require('async');
 
 /*
@@ -46,7 +45,7 @@ async.each(x, viewWallet, console.error);
 function viewWallet(wallet, done) {
 
     async.auto({
-        wallet: function(done){done(null, wallet)}, // dont understand this
+        wallet: function(done){done(null, wallet)}, // draws the wallet config details into async
         open: ['wallet', opensocket],
         watch: ['open', watchwallet]
     }, done)
@@ -55,11 +54,10 @@ function viewWallet(wallet, done) {
 // open connection(s)
 function opensocket(done, results) {
 
-    var wallet = results.wallet
+    // wallet configuration details
+    var wallet = results.wallet 
     // define address
-    var req = {type: "address", address:wallet.pubkey, block_chain: "bitcoin"};
-    console.log(req);
-    
+    var req = {type: "address", address:wallet.pubkey, block_chain: "bitcoin"};   
     // open, activate the connection
     conn.on('open', function () {        
         logger.info('Websocket opened.');            
@@ -88,7 +86,7 @@ function opensocket(done, results) {
 }
 
 function watchwallet(done, results) {
-    var wallet = results.wallet;
+    var wallet = results.wallet; // wallet{} and open{}
 
     logger.info("Watching address "+ wallet.pubkey +" for a deposit value of $" + wallet.itemcost);    
 
@@ -98,24 +96,14 @@ function watchwallet(done, results) {
         var activity = JSON.parse(data); // parse the websocket reponse
         //console.log(activity);
 
-        if (activity.payload.type == "address" && activity.payload.received != 0){
+        if (activity.payload.type == "address" && activity.payload.received != 0) {
             
-            console.log('validating deposit..');
-            //done(null, activity)
-
-            /*this sections needs to be completed. the parent function conn.on must stay active continuously; the validate/energize functions
-            must trigger and close each time conn.on is triggered. */
-            async.auto({
-                deposit: function(done){done(null, wallet)},
-                validate: ['deposit', validateDeposit],
-                energize: ['validate', energize]
-            }, done)            
+            results = merge(results,activity);
+            validateDeposit(done,results);
 
         } else if (activity.payload.type == "heartbeat") {
-            //logger.info("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
-        } else {
-            logger.info('Other activity detected. Ignoring (likely a confirmation or a withdrawl).');
-        }    
+            logger.debug("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
+        }   
     });  
 }
 
@@ -123,36 +111,37 @@ function validateDeposit(done, results) {
 
     var response = {};
     var wallet = results.wallet;
-    var activity = results.watch
+    var activity = results.payload;
 
-    if( wallet.pubkey == activity.payload.address ) {
-        if( activity.payload.confirmations != 0 ) {
+
+    if( wallet.pubkey == activity.address ) {
+        if( activity.confirmations != 0 ) {
             // this transaction is already confirmed
-            done(new Error("Transaction is not new. "+activity.payload.confirmations+" confirmations exist."));
+            logger.error("Transaction is not new. "+activity.confirmations+" confirmations exist.");
         } else {
+            logger.info('Validating deposit..');
             response.usd = currentPrice.val; // API price in CAD
-            response.received = activity.payload.received/100000000*currentPrice.val; // Amount detected, converted to CAD
+            response.received = activity.received/100000000*currentPrice.val; // Amount detected, converted to CAD
             response.expected = wallet.itemcost;
-            //console.log("price: $%s; received: $%s; expected: $%s; tolerance: $%s",values.usd,values.received,values.expected,wallet.pricetolerance);
+            logger.info("price: $%s; received: $%s; expected: $%s; tolerance: $%s",response.usd,response.received,response.expected,wallet.pricetolerance);
 
             if((response.expected - response.received) > wallet.pricetolerance) {
-                done(new Error("Value was not the expected amount. Expected: $" + response.expected + " Received: $" + response.received))
+                logger.error("Value was not the expected amount. Expected: $" + response.expected + " Received: $" + response.received);
             } else {
+                logger.info("#####################");
                 logger.info("Transaction is VALID.");
-                done(null, wallet);
+                logger.info("#####################");
+                //done(null, wallet);
+                energize(done,wallet);
             }
         }
-    } else {
-        done(new Error("Wallet Key and Activity Address do not match."))
     }
 }
 
 // GPIO controls for the Raspberry Pi Controller
 function energize(done, results) {
-    var pin = results.validate.gpio;
-    var duration = results.validate.gpiocycletime;
-
-    //console.log(results);
+    var pin = results.gpio;
+    var duration = results.gpiocycletime;
 
     logger.info("GPIO "+pin+" triggered for "+duration+" ms");
 
@@ -161,7 +150,7 @@ function energize(done, results) {
        if(err) {
             // likely what's happened here is that port is still open from a previous session. let's close it and recycle.
             gpio.close(pin, function(err) { 
-                done(new Error("We're having trouble closing the port.", err))
+                done(new Error("We're having trouble closing the GPIO.", err))
             });
        }
 
@@ -171,12 +160,12 @@ function energize(done, results) {
                     if(err) done(err);
                     gpio.close(pin, function closepin(err) {
                         if (err) {
-                            done(new Error("There was an error closing the PIN."));
+                            done(new Error("There was an error closing the GPIO."));
                         }
                         else
                         {
-                            logger.info("Close successful.");
-                            done()
+                            logger.info("GPIO close successful.");
+                            done();
                         }
                     });
                 });

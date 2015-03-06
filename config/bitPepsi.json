@@ -1,37 +1,17 @@
 {
     "wallets": [
         {"pubkey" : "1HBfz9HPSko7kUt5Vt8rPh4bfMfrxZBy6A",
-            "itemcost" : 0.15,
+            "itemcost" : 0.10,
             "gpio" : 11,
-            "gpiocycletime" : 2500,
-            "pricetolerance" : 0.10
-        },
-        {"pubkey" : "1L29y3VNRcCQdqvXhV1Jw2ALRARJeDsjDD",
-            "itemcost" : 0.50,
+            "gpiocycletime" : 5000,
+            "pricetolerance" : 0.03
+        }, 
+        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 0.15,
             "gpio" : 12,
             "gpiocycletime" : 2500,
-            "pricetolerance" : 0.05
-        },
-        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
-            "itemcost" : 4.00,
-            "gpio" : 13,
-            "pricetolerance" : 0.03
-        },
-        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
-            "itemcost" : 3.00,
-            "gpio" : 15,
-            "pricetolerance" : 0.03
-        },
-        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
-            "itemcost" : 15.00,
-            "gpio" : 16,
-            "pricetolerance" : 0.03
-        },                            
-        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
-            "itemcost" : 5.00,
-            "gpio" : 18,
-            "pricetolerance" : 0.03
-        }    
+            "pricetolerance" : 0.10
+        }           
     ],
 
     "gpio": {
