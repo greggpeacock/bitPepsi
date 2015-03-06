@@ -8,3 +8,4 @@
 {"level":"info","message":"[2015-02-16T02:30:40+00:00] :: Tick Tock. Current price: $undefined CAD. Last updated; undefined","timestamp":"2015-02-16T02:30:40.725Z"}
 {"level":"info","message":"[2015-02-16T02:31:00+00:00] :: Tick Tock. Current price: $undefined CAD. Last updated; undefined","timestamp":"2015-02-16T02:31:00.653Z"}
 {"level":"info","message":"[2015-02-16T02:31:20+00:00] :: Tick Tock. Current price: $undefined CAD. Last updated; undefined","timestamp":"2015-02-16T02:31:20.661Z"}
+{"level":"info","message":"Establising web socket...","timestamp":"2015-03-06T20:11:07.911Z"}
