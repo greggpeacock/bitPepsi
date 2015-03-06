@@ -17,7 +17,9 @@
     "gpio": {
         "gpiochecktime" : 10,
         "verbose" : "off",
-        "reconnects" : 10
+        "reconnects" : 10,
+        "indicatorlight" : 22,
+        "indicatortime" : 7500
     },
 
     "market" : {

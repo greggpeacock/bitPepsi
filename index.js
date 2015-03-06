@@ -8,7 +8,7 @@ var logger = require('winston'); // file and console loggin
 var argv = require('minimist')(process.argv.slice(2));
 var async = require('async');
 
-if(!argv.n) var gpio = require('pi-gpio'); // you must run this script on a raspberry pi for this to work
+if(!argv.nogpio) var gpio = require('pi-gpio'); // you must run this script on a raspberry pi for this to work
 
 /*
 
@@ -25,7 +25,7 @@ utility functions:
 
 // initiate logger
 logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
-if(!(Config.debug != 'true' || process.argv[3] == 'debug')) logger.remove(logger.transports.Console);
+if(!(Config.debug != 'true' || argv.debug)) logger.remove(logger.transports.Console);
 
 // get xbt market price,keep updating it.
 var currentPrice = {};
@@ -133,7 +133,6 @@ function validateDeposit(done, results) {
                 logger.info("#####################");
                 logger.info("Transaction is VALID.");
                 logger.info("#####################");
-                //done(null, wallet);
                 energize(done,wallet);
             }
         }
@@ -145,9 +144,7 @@ function energize(done, results) {
     var pin = results.gpio;
     var duration = results.gpiocycletime;
 
-    logger.info("GPIO "+pin+" triggered for "+duration+" ms");
-
-    if(!argv.n) {
+    if(!argv.nogpio) {
         gpio.open(pin, "output", function(err) {     // Open pin  output 
             
            if(err) {
@@ -158,6 +155,7 @@ function energize(done, results) {
            }
 
             gpio.write(pin,1, function high(err) { // 1=high 0=low
+                logger.info("GPIO "+pin+" triggered for "+duration+" ms");
                 setTimeout(function delaypin(err) {
                     gpio.write(pin,0, function low(err) {
                         if(err) done(err);
@@ -178,5 +176,8 @@ function energize(done, results) {
 
             });
         });
+    } else {
+        logger.info('Bypassing GPIO energize due to testing parameters.');
+        done();
     }
 }
