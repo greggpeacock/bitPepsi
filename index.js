@@ -170,9 +170,9 @@ function energize(done, results) {
                             }
                         });
 
-                    },duration); // how long in ms do we keep the GPIO 'high'
+                    }); // how long in ms do we keep the GPIO 'high'
 
-                });
+                },duration);
 
             });
         });
