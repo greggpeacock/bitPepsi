@@ -1,11 +1,17 @@
 {
     "wallets": [
-        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
-            "itemcost" : 1.00,
+        {"pubkey" : "1HBfz9HPSko7kUt5Vt8rPh4bfMfrxZBy6A",
+            "itemcost" : 0.10,
             "gpio" : 11,
-            "gpiocycletime" : 250,
+            "gpiocycletime" : 5000,
+            "pricetolerance" : 0.03
+        }, 
+        {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
+            "itemcost" : 0.15,
+            "gpio" : 12,
+            "gpiocycletime" : 2500,
             "pricetolerance" : 0.10
-        }   
+        }           
     ],
 
     "gpio": {
