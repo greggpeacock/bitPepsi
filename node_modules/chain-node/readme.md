@@ -19,7 +19,7 @@ var chain = new Chain({
 });
 
 chain.getAddress('17x23dNjXJLzGMev6R63uyRhMWP1VHawKc', function(err, resp) {
-  console.log('balance='+resp['balance']);
+  console.log('balance=' + resp.total.balance);
 });
 ```
 
