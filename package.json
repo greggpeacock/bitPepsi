@@ -1,9 +1,9 @@
 {
   "name": "bitpepsi",
   "version": "0.1.0",
-  "description": "bitcoinify a pepsi vending machine",
+  "description": "Bitcoin-enabled payments on an antiqute Pepsi vending machine",
   "author": "Gregg Peacock",
-  "main": "bitpepsi.js",
+  "main": "index.js",
   "scripts": {
     "test": "mocha test/",
     "start": "node index.js"
