@@ -1,36 +1,17 @@
 {
-  "name": "bitpepsi",
-  "version": "0.1.0",
-  "description": "Bitcoin-enabled payments on an antiqute Pepsi vending machine",
-  "author": "Gregg Peacock",
-  "main": "index.js",
+  "name": "bitPepsi",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "mocha test/",
-    "start": "node index.js"
+    "start": "node ./bin/www"
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "chain-node": "^3.0.0",
-    "express": "^4.12.2",
-    "merge": "^1.2.0",
-    "minimist": "^1.1.0",
-    "pi-gpio": "0.0.6",
-    "winston": "^0.9.0",
-    "ws": "^0.7.1"
-  },
-  "devDependencies": {
-    "mocha": "^2.1.0",
-    "supertest": "^0.9.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://www.github.com/greggpeacock/bitPepsi/"
-  },
-  "keywords": [
-    "bitcoin",
-    "vending",
-    "machine",
-    "iot"
-  ],
-  "license": "GNU"
+    "body-parser": "~1.12.0",
+    "cookie-parser": "~1.3.4",
+    "debug": "~2.1.1",
+    "express": "~4.12.0",
+    "jade": "~1.9.2",
+    "morgan": "~1.5.1",
+    "serve-favicon": "~2.2.0"
+  }
 }

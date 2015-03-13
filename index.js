@@ -3,4 +3,4 @@
 var test = require('./lib/bitpepsi.js'); 
 
 // test this structure
-test.superDuper();
+test.superDuper();g
