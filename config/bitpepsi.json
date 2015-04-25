@@ -1,16 +1,16 @@
 {
     "wallets": [
         {"pubkey" : "1HBfz9HPSko7kUt5Vt8rPh4bfMfrxZBy6A",
-            "itemcost" : 0.10,
-            "gpio" : 11,
-            "gpiocycletime" : 5000,
+            "itemcost" : 0.05,
+            "gpio" : 12,
+            "gpiocycletime" : 3000,
             "pricetolerance" : 0.03
         }, 
         {"pubkey" : "1DecentP5Q6c2woPhbSBsmYqyyfR52JZSS",
-            "itemcost" : 0.15,
-            "gpio" : 12,
-            "gpiocycletime" : 2500,
-            "pricetolerance" : 0.10
+            "itemcost" : 3.00,
+            "gpio" : 11,
+            "gpiocycletime" : 250,
+            "pricetolerance" : 0.05
         }           
     ],
 
@@ -25,5 +25,5 @@
 
     "exchanges" : ["bistamp","bitfinex"],
     "websocket" : "wss://ws.chain.com/v2/notifications",
-    "debug" : "false"
+    "debug" : "true"
 }
