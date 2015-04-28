@@ -8,6 +8,10 @@ var logger = require('winston'); // file and console loggin
 var argv = require('minimist')(process.argv.slice(2));
 var async = require('async');
 
+var conn;
+var currentPrice = {val: 0, updated: 0};
+var wallets = Config.wallets;
+
 if(!argv.nogpio) var gpio = require('pi-gpio'); // you must run this script on a raspberry pi for this to work
 
 /*
@@ -25,25 +29,58 @@ utility functions:
 
 // initiate logger
 logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
-if(!(Config.debug != 'true' || argv.debug)) logger.remove(logger.transports.Console);
+if(!(Config.debug == 'true' || argv.debug)) logger.remove(logger.transports.Console);
 
-// get xbt market price,keep updating it.
-var currentPrice = {};
 btcprice.updatePrice(function(x,results) {
-    currentPrice.val = results.last;
-    currentPrice.updated = results.timestamp;
+    if( x == null ) {
+        currentPrice.val = results.last;
+        currentPrice.updated = results.timestamp
+    }
 });
 
-logger.info('Establising web socket...'); 
-var conn = new WebSocket(Config.websocket);
-var x = Config.wallets;
+start();
 
+/*logger.info('Establising web socket...'); 
+conn = new WebSocket(Config.websocket);
 // watch all wallets in the config file
-async.each(x, viewWallet, console.error);
+async.each(wallets, viewWallet, function(err) { logger.error(err) }); */
 
 /* ============= */
 
-// Start Wallet Check
+function start() {
+    async.parallel([
+        establishWs, 
+        updateMarketPrice
+    ], function(err) { 
+        logger.error(err.message);
+        logger.info("Restarting in 10 seconds....");
+        setInterval(function() {
+            start();
+        },10000);
+     })
+}
+
+function establishWs(done,results) {
+    logger.info('Establishing web socket...'); 
+    conn = new WebSocket(Config.websocket);
+    
+    // watch all wallets in the config file
+    async.each(wallets, viewWallet, done);   
+}
+
+function updateMarketPrice(done,results) {
+    
+    btcprice.updatePrice(function(err,results) {
+        if( !err ) {
+            currentPrice.val = results.last;
+            currentPrice.updated = results.timestamp
+        } else {
+            done(err);
+        }
+    });
+}
+
+// Start Wallet Check - note, order of parameters is different here due to async.each called earlier.
 function viewWallet(wallet, done) {
 
     async.auto({
@@ -66,9 +103,7 @@ function opensocket(done, results) {
         conn.send(JSON.stringify(req), function (err) {
             if (err) {
                 done(new Error('Unable to connect to Websocket'));
-            }
-            else
-            {
+            } else {
                 logger.info("Connection successful.");
                 done();
             }
@@ -76,13 +111,14 @@ function opensocket(done, results) {
     });
     
     // connection errors
-    conn.on('error', done)
+    conn.on('error', function() {
+        done(new Error("Unknown websocket error."));
+    })
 
     // re-connect
     // this is NOT TESTED.
-    conn.on('close',function (wallet) {
-        logger.info("Connection lost. Reconnecting in 10 seconds....");
-        setTimeout(opensocket(wallet, done),10000);
+    conn.on('close',function () { //wallets
+        done(new Error("Websocket broken."));
     });
 
 }
@@ -104,7 +140,7 @@ function watchwallet(done, results) {
             validateDeposit(done,results);
 
         } else if (activity.payload.type == "heartbeat") {
-            logger.debug("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
+            logger.info("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
         }   
     });  
 }
@@ -162,9 +198,7 @@ function energize(done, results) {
                         gpio.close(pin, function closepin(err) {
                             if (err) {
                                 done(new Error("There was an error closing the GPIO."));
-                            }
-                            else
-                            {
+                            } else {
                                 logger.info("GPIO close successful.");
                                 done();
                             }
