@@ -31,12 +31,12 @@ utility functions:
 logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
 if(!(Config.debug == 'true' || argv.debug)) logger.remove(logger.transports.Console);
 
-btcprice.updatePrice(function(x,results) {
+/*btcprice.updatePrice(function(x,results) {
     if( x == null ) {
         currentPrice.val = results.last;
         currentPrice.updated = results.timestamp
     }
-});
+}); */
 
 start();
 
@@ -48,24 +48,18 @@ async.each(wallets, viewWallet, function(err) { logger.error(err) }); */
 /* ============= */
 
 function start() {
-    async.parallel([
-        establishWs, 
-        updateMarketPrice
+    async.parallel([         
+        updateMarketPrice,
+        establishWs
     ], function(err) { 
         logger.error(err.message);
-        logger.info("Restarting in 10 seconds....");
+        logger.info("Exiting in 3 seconds....");
         setInterval(function() {
-            start();
-        },10000);
+            logger.info('Bye!!');
+            process.exit(1);
+        },3000);
      })
-}
 
-function establishWs(done,results) {
-    logger.info('Establishing web socket...'); 
-    conn = new WebSocket(Config.websocket);
-    
-    // watch all wallets in the config file
-    async.each(wallets, viewWallet, done);   
 }
 
 function updateMarketPrice(done,results) {
@@ -78,6 +72,14 @@ function updateMarketPrice(done,results) {
             done(err);
         }
     });
+}
+
+function establishWs(done,results) {
+    logger.info('Establishing web socket...'); 
+    conn = new WebSocket(Config.websocket);
+    
+    // watch all wallets in the config file
+    async.each(wallets, viewWallet, done);   
 }
 
 // Start Wallet Check - note, order of parameters is different here due to async.each called earlier.
@@ -140,7 +142,7 @@ function watchwallet(done, results) {
             validateDeposit(done,results);
 
         } else if (activity.payload.type == "heartbeat") {
-            logger.info("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
+            logger.debug("Tick Tock. Current price: $"+currentPrice.val+" CAD. Last updated: " + currentPrice.updated);
         }   
     });  
 }

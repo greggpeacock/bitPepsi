@@ -25,5 +25,5 @@
 
     "exchanges" : ["bistamp","bitfinex"],
     "websocket" : "wss://ws.chain.com/v2/notifications",
-    "debug" : "true"
+    "debug" : "false"
 }
