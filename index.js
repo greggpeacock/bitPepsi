@@ -28,8 +28,9 @@ utility functions:
 */
 
 // initiate logger
-logger.add(logger.transports.File, { filename: './log/bitpepsi.log' });
-if(!(Config.debug == 'true' || argv.debug)) logger.remove(logger.transports.Console);
+process.env.TZ = 'America/Vancouver'
+logger.add(logger.transports.File, { 'filename': './log/bitpepsi.log','timestamp': function() {return new Date().toString();} });
+if(!argv.debug) logger.remove(logger.transports.Console);
 
 /*btcprice.updatePrice(function(x,results) {
     if( x == null ) {
